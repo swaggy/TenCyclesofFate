@@ -16,6 +16,7 @@ if settings.OPENAI_API_KEY and settings.OPENAI_API_KEY != "your_openai_api_key_h
         client = AsyncOpenAI(
             api_key=settings.OPENAI_API_KEY,
             base_url=settings.OPENAI_BASE_URL,
+            default_headers={"User-Agent": settings.OPENAI_USER_AGENT},
         )
         logger.info("OpenAI 客户端初始化成功。")
     except Exception as e:

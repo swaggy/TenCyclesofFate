@@ -15,13 +15,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # --- OAuth Client ---
 oauth = OAuth()
 oauth.register(
-    name="linuxdo",
-    client_id=settings.LINUXDO_CLIENT_ID,
-    client_secret=settings.LINUXDO_CLIENT_SECRET,
-    access_token_url="https://connect.linux.do/oauth2/token",
-    authorize_url="https://connect.linux.do/oauth2/authorize",
-    api_base_url="https://connect.linux.do/",
-    client_kwargs={"scope": settings.LINUXDO_SCOPE},
+    name="github",
+    client_id=settings.GITHUB_CLIENT_ID,
+    client_secret=settings.GITHUB_CLIENT_SECRET,
+    access_token_url="https://github.com/login/oauth/access_token",
+    authorize_url="https://github.com/login/oauth/authorize",
+    api_base_url="https://api.github.com/",
+    client_kwargs={"scope": settings.GITHUB_SCOPE},
 )
 
 # --- Models ---

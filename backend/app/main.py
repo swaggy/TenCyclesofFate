@@ -47,25 +47,25 @@ root_router = APIRouter()
 
 
 # --- Authentication Routes ---
-@api_router.get('/login/linuxdo')
-async def login_linuxdo(request: Request):
+@api_router.get('/login/github')
+async def login_github(request: Request):
     """
-    Redirects the user to Linux.do for authentication.
+    Redirects the user to GitHub for authentication.
     """
     # Use a hardcoded, absolute URL for the callback to avoid ambiguity
-    # This must match the URL registered in your Linux.do OAuth application settings.
+    # This must match the URL registered in your GitHub OAuth application settings.
     redirect_uri = str(request.url.replace(path="/callback"))
-    return await auth.oauth.linuxdo.authorize_redirect(request, redirect_uri)
+    return await auth.oauth.github.authorize_redirect(request, redirect_uri)
 
 @root_router.get('/callback')
-async def auth_linuxdo_callback(request: Request):
+async def auth_github_callback(request: Request):
     """
-    Handles the callback from Linux.do after authentication.
+    Handles the callback from GitHub after authentication.
     This route is now at the root to match the expected OAuth callback URL.
     Fetches user info, creates a JWT, and sets it in a cookie.
     """
     try:
-        token = await auth.oauth.linuxdo.authorize_access_token(request)
+        token = await auth.oauth.github.authorize_access_token(request)
     except Exception as e:
         logger.error(f"Error during OAuth callback: {e}")
         raise HTTPException(
@@ -73,17 +73,17 @@ async def auth_linuxdo_callback(request: Request):
             detail="Could not authorize access token",
         )
 
-    resp = await auth.oauth.linuxdo.get('api/user', token=token)
+    resp = await auth.oauth.github.get('user', token=token)
     resp.raise_for_status()
     user_info = resp.json()
 
-    # Create JWT with user info from linux.do
+    # Create JWT with user info from GitHub
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     jwt_payload = {
-        "sub": user_info.get("username"),
+        "sub": user_info.get("login"),  # GitHub uses 'login' for username
         "id": user_info.get("id"),
         "name": user_info.get("name"),
-        "trust_level": user_info.get("trust_level"),
+        "trust_level": 1,  # Default trust level for GitHub users
     }
     access_token = auth.create_access_token(
         data=jwt_payload, expires_delta=access_token_expires
