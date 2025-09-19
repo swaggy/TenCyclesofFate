@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    # 使用预构建的镜像
+    image: ghcr.io/swaggy/tencyclesoffate:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      # 直接使用.env文件加载所有环境变量
+      - ./backend/.env
+    environment:
+      # Docker特定的环境变量覆盖
+      - HOST=0.0.0.0
+      - PORT=8000
+      - UVICORN_RELOAD=false
+    volumes:
+      # 挂载日志目录（可选）
+      - ./logs:/app/logs
+      # 挂载数据库文件（如果使用SQLite）
+      - ./veloera.db:/app/veloera.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/live/players"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 可选：如果需要数据库
+  # mysql:
+  #   image: mysql:8.0
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: rootpassword
+  #     MYSQL_DATABASE: tencycles
+  #     MYSQL_USER: appuser
+  #     MYSQL_PASSWORD: apppassword
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   restart: unless-stopped
+
+# volumes:
+#   mysql_data:
