@@ -2,7 +2,7 @@
 # 多阶段构建，优化最终镜像大小
 
 # 第一阶段：构建依赖环境
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # 设置工作目录
 WORKDIR /app
@@ -40,7 +40,8 @@ COPY --from=builder /root/.local /home/appuser/.local
 # 复制应用代码
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
-COPY game_data.json ./
+# 复制游戏数据文件（如果存在）
+COPY game_data.json* ./
 
 # 创建必要的目录并设置权限
 RUN mkdir -p /app/logs && \
@@ -61,17 +62,12 @@ ENV HOST=0.0.0.0
 ENV PORT=8000
 ENV UVICORN_RELOAD=false
 
-# 默认环境变量（可通过docker run -e 或 docker-compose 覆盖）
-ENV OPENAI_API_KEY=""
+# 默认环境变量（敏感信息必须通过环境变量或.env文件提供）
 ENV OPENAI_BASE_URL="https://api.openai.com/v1"
 ENV OPENAI_MODEL="gpt-3.5-turbo"
 ENV OPENAI_MODEL_CHEAT_CHECK="gpt-3.5-turbo"
-ENV SECRET_KEY="change_this_secret_key_in_production"
 ENV ALGORITHM="HS256"
-ENV ACCESS_TOKEN_EXPIRE_MINUTES=600
 ENV DATABASE_URL="sqlite:///veloera.db"
-ENV GITHUB_CLIENT_ID=""
-ENV GITHUB_CLIENT_SECRET=""
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
